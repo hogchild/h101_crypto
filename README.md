@@ -1,6 +1,6 @@
 # h101_crypto
 
-This app is made up of two basic tools to encypt text using AES 128-bit encryption.
+This app is made up of two basic tools to encrypt text using AES 128-bit encryption.
 h101_encrypt is for encrypting, h101_decrypt for decrypting.
 
 ```commandline
