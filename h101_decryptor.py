@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# h101_decryptor.py
+# h101_decrypt_core.py
 
 import binascii
 
@@ -13,7 +13,7 @@ class Aes128Decryptor:
     Decrypts an AES 128-bit encrypted string.
     """
 
-    def __init__(self, encryption_key: str, data: bytes):
+    def __init__(self, encryption_key: str, data: str):
         """
         The encryption key needs to be the exact 16-char long string
         used originally to encrypt the data.
@@ -23,14 +23,18 @@ class Aes128Decryptor:
         self.c = Console()
         self.encryption_key = encryption_key.encode("utf-8")
         self.data_to_decrypt = data
+        self.restored_url_safe_chars_data_to_decrypt = ""
         self.base64_decoded_data = b""
         self.iv = b""
         self.iv_stripped_data = b""
         self.decrypted_data = b""
         self.unpadded_data = b""
 
+    def restore_urls_safe_chars(self):
+        self.restored_url_safe_chars_data_to_decrypt = self.data_to_decrypt.replace('~', '=').replace('!', '/').replace('-', '+')
+
     def base64_decode_data(self):
-        self.base64_decoded_data = binascii.a2b_base64(self.data_to_decrypt)
+        self.base64_decoded_data = binascii.a2b_base64(self.restored_url_safe_chars_data_to_decrypt)
 
     def extract_iv(self):
         self.iv = self.base64_decoded_data[:16]
@@ -46,8 +50,10 @@ class Aes128Decryptor:
         self.unpadded_data = unpad(self.decrypted_data, 16)
 
     def decrypt(self):
+        self.restore_urls_safe_chars()
+        self.c.print(f"[+] Restoring url-safe characters: {self.restored_url_safe_chars_data_to_decrypt}", style="white")
         self.base64_decode_data()
-        self.c.print(f"[+] Base64 decoded AES 128 encrypted data: {self.base64_decoded_data}", style="bright_red")
+        self.c.print(f"[+] Base64 decoded AES 128 encrypted data: {self.restored_url_safe_chars_data_to_decrypt}", style="bright_red")
         self.extract_iv()
         self.c.print(f"[+] IV: {self.iv}", style="green_yellow")
         self.iv_strip_data()
@@ -60,8 +66,8 @@ class Aes128Decryptor:
 
 
 def main():
-    data_to_decrypt = b'eCuu+sQfXBkvPHwChvtL2KRzwc4h+7SodYFOmxrRzxw='
-    encryptor = Aes128Encryptor("sixteenbytekey!!", data_to_decrypt)
+    data_to_decrypt = 'eCuu+sQfXBkvPHwChvtL2KRzwc4h+7SodYFOmxrRzxw='
+    encryptor = Aes128Decryptor("sixteenbytekey!!", data_to_decrypt)
     encryptor.decrypt()
 
 
